@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/iota-uz/margo/renderer"
 	"io"
 	"io/fs"
 	"path/filepath"
@@ -128,7 +127,7 @@ func (m *MarkdownLoader) Load(item *FsItem, reg registry.Registry) (Page, error)
 		}
 		component = templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 			return margoConverter.ConvertToTempl(layoutBytes).Render(
-				renderer.WithSlot(ctx, margoConverter.ConvertToTempl(fileBytes)),
+				margo.WithSlot(ctx, margoConverter.ConvertToTempl(fileBytes)),
 				w,
 			)
 		})

@@ -1,4 +1,4 @@
-package renderer
+package margo
 
 import (
 	"bufio"
@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/a-h/templ"
-	"github.com/iota-uz/margo"
 	"github.com/iota-uz/margo/parser"
 	"github.com/iota-uz/margo/registry"
 	"github.com/yuin/goldmark"
@@ -68,7 +67,7 @@ func (r *MarkdownRenderer) RegisterFuncs(registerer renderer.NodeRendererFuncReg
 }
 
 // NewRenderer creates a new markdown renderer
-func NewRenderer(reg registry.Layout, options ...renderer.Option) margo.Renderer {
+func NewRenderer(reg registry.Layout, options ...renderer.Option) Renderer {
 	config := renderer.NewConfig()
 	for _, opt := range options {
 		opt.SetConfig(config)
@@ -483,7 +482,7 @@ func (nr *NodeRenderer) renderChildren(node *parser.ComponentNode, namespace reg
 			components = append(components, comp)
 		case *parser.TextNode:
 			comp := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-				return margo.New(nr.layout).Convert([]byte(c.Value), w)
+				return New(nr.layout).Convert([]byte(c.Value), w)
 			})
 			components = append(components, comp)
 		}

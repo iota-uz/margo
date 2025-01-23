@@ -1,10 +1,9 @@
-package renderer
+package margo
 
 import (
 	"context"
 	"fmt"
 	"github.com/a-h/templ"
-	"github.com/iota-uz/margo"
 	"github.com/iota-uz/margo/parser"
 	"github.com/iota-uz/margo/registry"
 	"github.com/yuin/goldmark/ast"
@@ -196,14 +195,14 @@ func (cb *ComponentBuilder) setComponentNodeValue(field reflect.Value, node *par
 
 func (cb *ComponentBuilder) setTextNodeValue(field reflect.Value, node *parser.TextNode) error {
 	field.Set(reflect.ValueOf(templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		return margo.New(cb.layout).Convert([]byte(node.Value), w)
+		return New(cb.layout).Convert([]byte(node.Value), w)
 	})))
 	return nil
 }
 
 func (cb *ComponentBuilder) setStringValue(field reflect.Value, value string) error {
 	field.Set(reflect.ValueOf(templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		return margo.New(cb.layout).Convert([]byte(value), w)
+		return New(cb.layout).Convert([]byte(value), w)
 	})))
 	return nil
 }

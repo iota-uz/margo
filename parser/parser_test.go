@@ -1,9 +1,8 @@
 // parser_test.go
-package margo
+package parser
 
 import (
 	"github.com/google/go-cmp/cmp"
-	"github.com/iota-uz/margo/parser"
 	"strings"
 	"testing"
 )
@@ -17,7 +16,7 @@ func TestParserBasic(t *testing.T) {
         Href: "https://example.com"
         See Demo
 `
-	nodes, err := parser.NewMargoParser(strings.TrimSpace(input)).Parse()
+	nodes, err := NewMargoParser(strings.TrimSpace(input)).Parse()
 	if err != nil {
 		t.Fatalf("Parse() failed: %v", err)
 	}
@@ -26,7 +25,7 @@ func TestParserBasic(t *testing.T) {
 		t.Fatalf("Expected 1 top-level node, got %d", len(nodes))
 	}
 
-	hero := nodes[0].(*parser.ComponentNode)
+	hero := nodes[0].(*ComponentNode)
 	if hero.Name != "HeroV2" {
 		t.Errorf("Expected top-level node name to be HeroV2, got %s", hero.Name)
 	}
@@ -56,7 +55,7 @@ func TestParserBasic(t *testing.T) {
 		t.Fatalf("Expected 1 child node under HeroV2, got %d", len(hero.Children()))
 	}
 
-	button := hero.Children()[0].(*parser.ComponentNode)
+	button := hero.Children()[0].(*ComponentNode)
 	if button.Name != "ButtonPrimary" {
 		t.Errorf("Expected child node name to be ButtonPrimary, got %s", button.Name)
 	}
@@ -77,7 +76,7 @@ func TestParserBasic(t *testing.T) {
 		t.Fatalf("Expected 1 text child under ButtonPrimary, got %d", len(button.Children()))
 	}
 
-	textNode := button.Children()[0].(*parser.TextNode)
+	textNode := button.Children()[0].(*TextNode)
 	if textNode.Value != "See Demo" {
 		t.Errorf("Expected text value 'See Demo', got %s", textNode.Value)
 	}
@@ -96,7 +95,7 @@ func TestParserWithNestedComponents(t *testing.T) {
                 Variant: "DuoTone"
 `
 
-	nodes, err := parser.NewMargoParser(strings.TrimSpace(input)).Parse()
+	nodes, err := NewMargoParser(strings.TrimSpace(input)).Parse()
 	if err != nil {
 		t.Fatalf("Parse() failed: %v", err)
 	}
@@ -105,7 +104,7 @@ func TestParserWithNestedComponents(t *testing.T) {
 		t.Fatalf("Expected 1 top-level node, got %d", len(nodes))
 	}
 
-	features := nodes[0].(*parser.ComponentNode)
+	features := nodes[0].(*ComponentNode)
 	if features.Name != "Features" {
 		t.Errorf("Expected top-level node name to be Features, got %s", features.Name)
 	}
@@ -136,7 +135,7 @@ func TestParserWithNestedComponents(t *testing.T) {
 		t.Fatalf("Expected 1 Card child, got %d", len(features.Children()))
 	}
 
-	card := features.Children()[0].(*parser.ComponentNode)
+	card := features.Children()[0].(*ComponentNode)
 	if card.Name != "Card" {
 		t.Errorf("Expected Card node name to be Card, got %s", card.Name)
 	}
@@ -151,7 +150,7 @@ func TestParserWithNestedComponents(t *testing.T) {
 		t.Errorf("Expected Card Title to be 'Blazing Fast Performance', got %v", cardAttrs[0].Value)
 	}
 
-	icon := cardAttrs[1].Value.(*parser.ComponentNode)
+	icon := cardAttrs[1].Value.(*ComponentNode)
 	if icon.Name != "IconLightning" {
 		t.Errorf("Expected Icon node name to be IconLightning, got %s", icon.Name)
 	}
@@ -186,7 +185,7 @@ func TestParserWithMultilineText(t *testing.T) {
     MoreText: "More single-line text."
 `
 
-	nodes, err := parser.NewMargoParser(input).Parse()
+	nodes, err := NewMargoParser(input).Parse()
 	if err != nil {
 		t.Fatalf("Parse() failed: %v", err)
 	}
@@ -195,7 +194,7 @@ func TestParserWithMultilineText(t *testing.T) {
 		t.Fatalf("Expected 1 top-level node, got %d", len(nodes))
 	}
 
-	desc := nodes[0].(*parser.ComponentNode)
+	desc := nodes[0].(*ComponentNode)
 	if desc.Name != "Description" {
 		t.Errorf("Expected top-level node name to be Description, got %s", desc.Name)
 	}
@@ -248,7 +247,7 @@ func TestParserWithNavigation(t *testing.T) {
         Docs
 \Slot`
 
-	nodes, err := parser.NewMargoParser(input).Parse()
+	nodes, err := NewMargoParser(input).Parse()
 	if err != nil {
 		t.Fatalf("Parse() failed: %v", err)
 	}
@@ -258,7 +257,7 @@ func TestParserWithNavigation(t *testing.T) {
 	}
 
 	// Test Header component
-	header := nodes[0].(*parser.ComponentNode)
+	header := nodes[0].(*ComponentNode)
 	if header.Name != "Header" {
 		t.Errorf("Expected first node to be Header, got %s", header.Name)
 	}
@@ -286,7 +285,7 @@ func TestParserWithNavigation(t *testing.T) {
 	}
 
 	for i, link := range links {
-		linkNode := link.(*parser.ComponentNode)
+		linkNode := link.(*ComponentNode)
 		if linkNode.Name != "Link" {
 			t.Errorf("Expected Link component at index %d, got %s", i, linkNode.Name)
 		}
@@ -300,14 +299,14 @@ func TestParserWithNavigation(t *testing.T) {
 			t.Fatalf("Expected 1 text child under Link at index %d, got %d", i, len(linkNode.Children()))
 		}
 
-		textNode := linkNode.Children()[0].(*parser.TextNode)
+		textNode := linkNode.Children()[0].(*TextNode)
 		if textNode.Value != expectedLinks[i].label {
 			t.Errorf("Expected text %s at index %d, got %s", expectedLinks[i].label, i, textNode.Value)
 		}
 	}
 
 	// Test Slot component
-	slot := nodes[1].(*parser.ComponentNode)
+	slot := nodes[1].(*ComponentNode)
 	if slot.Name != "Slot" {
 		t.Errorf("Expected second node to be Slot, got %s", slot.Name)
 	}
@@ -336,7 +335,7 @@ func TestParser_ParseWithComplexProps(t *testing.T) {
     \Slot
 `
 
-	nodes, err := parser.NewMargoParser(input).Parse()
+	nodes, err := NewMargoParser(input).Parse()
 	if err != nil {
 		t.Fatalf("Parse() failed: %v", err)
 	}
@@ -345,7 +344,7 @@ func TestParser_ParseWithComplexProps(t *testing.T) {
 		t.Fatalf("Expected 1 top-level node, got %d", len(nodes))
 	}
 
-	docsLayout := nodes[0].(*parser.ComponentNode)
+	docsLayout := nodes[0].(*ComponentNode)
 	if docsLayout.Name != "DocsLayout" {
 		t.Errorf("Expected top-level node name to be DocsLayout, got %s", docsLayout.Name)
 	}
@@ -366,7 +365,7 @@ func TestParser_ParseWithComplexProps(t *testing.T) {
 		t.Fatalf("Expected prop name to be Header, got %s", attrs[0].Name)
 	}
 	// Test Header component
-	navbar := attrs[0].Value.(*parser.ComponentNode)
+	navbar := attrs[0].Value.(*ComponentNode)
 	if navbar.Name != "Navbar" {
 		t.Errorf("Expected Header node name to be Navbar, got %s", navbar.Name)
 	}
@@ -393,7 +392,7 @@ func TestParser_ParseWithComplexProps(t *testing.T) {
 	}
 
 	for i, link := range links {
-		linkNode := link.(*parser.ComponentNode)
+		linkNode := link.(*ComponentNode)
 		if linkNode.Name != "Link" {
 			t.Errorf("Expected Link component at index %d, got %s", i, linkNode.Name)
 		}
@@ -407,7 +406,7 @@ func TestParser_ParseWithComplexProps(t *testing.T) {
 			t.Fatalf("Expected 1 text child under Link at index %d, got %d", i, len(linkNode.Children()))
 		}
 
-		textNode := linkNode.Children()[0].(*parser.TextNode)
+		textNode := linkNode.Children()[0].(*TextNode)
 		if textNode.Value != expectedLinks[i].label {
 			t.Errorf("Expected text %s at index %d, got %s", expectedLinks[i].label, i, textNode.Value)
 		}
@@ -493,7 +492,7 @@ func TestParser_ParseWithComplexProps(t *testing.T) {
 
 func TestParserWithEmptyInput(t *testing.T) {
 	input := ""
-	nodes, err := parser.NewMargoParser(input).Parse()
+	nodes, err := NewMargoParser(input).Parse()
 	if err != nil {
 		t.Fatalf("Parse() failed: %v", err)
 	}

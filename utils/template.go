@@ -1,4 +1,4 @@
-package margo
+package utils
 
 func OR[T comparable](value, fallback T) T {
 	var zero T

@@ -19,7 +19,6 @@ import (
 
 	margoparser "github.com/iota-uz/margo/parser"
 	"github.com/iota-uz/margo/registry"
-	margorender "github.com/iota-uz/margo/renderer"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 )
 
@@ -30,7 +29,7 @@ type Markdown interface {
 
 type markdown struct {
 	parser     parser.Parser
-	renderer   margorender.Renderer
+	renderer   Renderer
 	extensions []goldmark.Extender
 }
 
@@ -43,7 +42,7 @@ func New(reg registry.Layout) Markdown {
 	)
 	md := &markdown{
 		parser:   defaultParser,
-		renderer: margorender.NewRenderer(reg, renderer.WithNodeRenderers(util.Prioritized(html.NewRenderer(), 1000))),
+		renderer: NewRenderer(reg, renderer.WithNodeRenderers(util.Prioritized(html.NewRenderer(), 1000))),
 		extensions: []goldmark.Extender{
 			Extension(reg),
 			meta.Meta,
