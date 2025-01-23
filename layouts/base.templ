@@ -1,0 +1,29 @@
+package layouts
+
+import "github.com/iota-uz/margo/types"
+
+templ Base() {
+	{{ pageCtx := types.MustUsePageCtx(ctx) }}
+	<!DOCTYPE html>
+	<html lang={ pageCtx.Locale } class="system">
+		<head>
+			<title>{ pageCtx.Seo.Title }</title>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link rel="icon" type="image/x-icon" href="/assets/img/favicon.svg"/>
+			<link rel="stylesheet" href="/assets/css/main.min.css"/>
+			<link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet"/>
+			<link rel="preload" href="/assets/fonts/Gilroy/Gilroy-Regular.woff2" as="font" type="font/woff2" crossorigin/>
+			<link rel="preload" href="/assets/fonts/Gilroy/Gilroy-Medium.woff2" as="font" type="font/woff2" crossorigin/>
+			<link rel="preload" href="/assets/fonts/Gilroy/Gilroy-Semibold.woff2" as="font" type="font/woff2" crossorigin/>
+			<script defer type="module" src="/assets/js/alpine.js"></script>
+			<script defer async src="/assets/js/lib/htmx.min.js"></script>
+			<script defer async src="/assets/js/lib/htmx.preload.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+			@pageCtx.Seo
+		</head>
+		<body class="antialiased">
+			{ children... }
+		</body>
+	</html>
+}
