@@ -182,6 +182,8 @@ func (nr *NodeRenderer) RenderNode(ctx context.Context, w io.Writer, source []by
 			return nr.renderList(ctx, writer, source, n, entering)
 		case ast.KindListItem:
 			return nr.renderListItem(ctx, writer, source, n, entering)
+		case ast.KindImage:
+			return nr.renderImage(ctx, writer, source, n, entering)
 		default:
 			return nr.renderDefault(writer, source, n, entering)
 		}
@@ -205,6 +207,41 @@ func (nr *NodeRenderer) renderMargoNode(ctx context.Context, w util.BufWriter, s
 			return ast.WalkStop, err
 		}
 	}
+	return ast.WalkSkipChildren, nil
+}
+
+func (nr *NodeRenderer) renderImage(ctx context.Context, w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	n := node.(*ast.Image)
+	component, ok := nr.layout.Get("img")
+	if !ok {
+		return nr.renderDefault(w, source, n, entering)
+	}
+	if !entering {
+		return ast.WalkContinue, nil
+	}
+
+	attributes := append(
+		n.Attributes(),
+		ast.Attribute{
+			Name:  []byte("src"),
+			Value: string(n.Destination),
+		},
+	)
+	if n.Title != nil {
+		attributes = append(attributes, ast.Attribute{
+			Name:  []byte("title"),
+			Value: string(n.Title),
+		})
+	}
+	cmp, err := nr.builder.Build(component, attributes)
+	if err != nil {
+		return ast.WalkStop, err
+	}
+
+	if err := cmp.Render(ctx, w); err != nil {
+		return ast.WalkStop, err
+	}
+
 	return ast.WalkSkipChildren, nil
 }
 
